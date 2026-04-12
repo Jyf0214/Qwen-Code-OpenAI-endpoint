@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: qwen-openai-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - qwen-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # phpMyAdmin（可选，用于管理 MySQL）
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: qwen-openai-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${PHPMYADMIN_PORT}:80"
+    depends_on:
+      - mysql
+    networks:
+      - qwen-network
+    profiles:
+      - tools
+
+  # Qwen OpenAI 端点服务
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qwen-openai-app
+    restart: unless-stopped
+    environment:
+      PORT: ${APP_PORT}
+      NODE_ENV: production
+      DATABASE_URL: mysql://${DB_USER}:${DB_PASSWORD}@mysql:3306/${DB_NAME}
+      QWEN_OAUTH_BASE_URL: https://chat.qwen.ai
+      QWEN_API_URL: https://portal.qwen.ai
+      QWEN_OAUTH_CLIENT_ID: ${QWEN_OAUTH_CLIENT_ID}
+      QWEN_OAUTH_SCOPE: ${QWEN_OAUTH_SCOPE}
+      DEFAULT_MODEL: ${DEFAULT_MODEL}
+      MAX_RETRIES: ${MAX_RETRIES}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
+      POLLING_STRATEGY: ${POLLING_STRATEGY}
+      TOKEN_REFRESH_BUFFER: ${TOKEN_REFRESH_BUFFER}
+      API_SECRET: ${API_SECRET}
+    ports:
+      - "${APP_PORT}:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - qwen-network
+    volumes:
+      - ./logs:/app/logs
+    command: >
+      sh -c "npx prisma db push --accept-data-loss && node src/index.js"
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  qwen-network:
+    driver: bridge

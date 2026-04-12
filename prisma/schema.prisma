@@ -1,0 +1,70 @@
+// Prisma 数据模型
+// 对应官方 Qwen Code 的 OAuth 认证流程
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Qwen 账号表
+model Account {
+  id                        Int       @id @default(autoincrement())
+  name                      String    @db.VarChar(255)
+  deviceCode                String?   @map("device_code") @db.VarChar(500)
+  userCode                  String?   @map("user_code") @db.VarChar(50)
+  verificationUri           String?   @map("verification_uri") @db.Text
+  verificationUriComplete   String?   @map("verification_uri_complete") @db.Text
+  accessToken               String?   @map("access_token") @db.Text
+  refreshToken              String?   @map("refresh_token") @db.Text
+  tokenType                 String?   @map("token_type") @default("Bearer") @db.VarChar(50)
+  expiresAt                 DateTime? @map("expires_at")
+  scope                     String?   @db.VarChar(255)
+  pkceVerifier              String?   @map("pkce_verifier") @db.VarChar(255)
+  pkceChallenge             String?   @map("pkce_challenge") @db.VarChar(255)
+  status                    String    @default("pending") @db.VarChar(50)
+  isActive                  Boolean   @map("is_active") @default(true)
+  requestCount              Int       @map("request_count") @default(0)
+  lastUsedAt                DateTime? @map("last_used_at")
+  createdAt                 DateTime  @default(now()) @map("created_at")
+  updatedAt                 DateTime  @updatedAt @map("updated_at")
+  requestLogs               RequestLog[]
+
+  @@map("accounts")
+  @@index([status])
+  @@index([isActive])
+  @@index([expiresAt])
+}
+
+// 请求日志表
+model RequestLog {
+  id           Int      @id @default(autoincrement())
+  accountId    Int?     @map("account_id")
+  model        String?  @db.VarChar(255)
+  endpoint     String?  @db.VarChar(255)
+  method       String?  @db.VarChar(10)
+  statusCode   Int?     @map("status_code")
+  responseTime Int?     @map("response_time")
+  errorMessage String?  @map("error_message") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+  account      Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  @@map("request_logs")
+  @@index([accountId])
+  @@index([createdAt])
+}
+
+// 系统设置表
+model Setting {
+  id          Int      @id @default(autoincrement())
+  keyName     String   @unique @map("key_name") @db.VarChar(255)
+  keyValue    String?  @map("key_value") @db.Text
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}

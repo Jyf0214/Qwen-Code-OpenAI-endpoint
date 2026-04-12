@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qwen OpenAI 端点管理面板</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🤖 Qwen OpenAI 端点管理面板</h1>
+      <div class="header-actions">
+        <button id="refreshBtn" class="btn btn-secondary">🔄 刷新</button>
+      </div>
+    </header>
+
+    <!-- 统计信息 -->
+    <section class="stats-section">
+      <div class="stat-card">
+        <div class="stat-value" id="totalAccounts">0</div>
+        <div class="stat-label">总账号数</div>
+      </div>
+      <div class="stat-card stat-active">
+        <div class="stat-value" id="activeAccounts">0</div>
+        <div class="stat-label">活跃账号</div>
+      </div>
+      <div class="stat-card stat-expired">
+        <div class="stat-value" id="expiredAccounts">0</div>
+        <div class="stat-label">过期账号</div>
+      </div>
+      <div class="stat-card stat-requests">
+        <div class="stat-value" id="totalRequests">0</div>
+        <div class="stat-label">总请求数</div>
+      </div>
+    </section>
+
+    <!-- 添加账号 -->
+    <section class="add-account-section">
+      <h2>➕ 添加新账号</h2>
+      <form id="addAccountForm" class="add-form">
+        <div class="form-group">
+          <input type="text" id="accountName" placeholder="输入账号名称" required>
+          <button type="submit" class="btn btn-primary">发起授权</button>
+        </div>
+      </form>
+      <div id="authStatus" class="auth-status" style="display: none;">
+        <p>请在浏览器中打开以下链接完成授权：</p>
+        <a id="authLink" href="#" target="_blank" class="auth-link"></a>
+        <p>授权码：<strong id="userCode"></strong></p>
+        <p>剩余时间：<span id="countdown"></span></p>
+        <button id="checkTokenBtn" class="btn btn-secondary">检查授权状态</button>
+      </div>
+    </section>
+
+    <!-- 账号列表 -->
+    <section class="accounts-section">
+      <div class="section-header">
+        <h2>📋 账号列表</h2>
+        <button id="refreshAllTokens" class="btn btn-secondary">🔄 刷新所有 Token</button>
+      </div>
+      <div id="accountsList" class="accounts-list">
+        <p class="empty-state">加载中...</p>
+      </div>
+    </section>
+
+    <!-- 请求日志 -->
+    <section class="logs-section">
+      <h2>📝 最近请求日志</h2>
+      <div id="logsList" class="logs-list">
+        <p class="empty-state">加载中...</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
