@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:22-alpine
 
 # 安装构建依赖
 RUN apk add --no-cache python3 make g++ openssl
