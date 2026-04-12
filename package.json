@@ -2,29 +2,36 @@
   "name": "qwen-openai-endpoint",
   "version": "1.0.0",
   "description": "OpenAI-compatible endpoint for Qwen Code with multi-account support",
-  "main": "src/index.js",
+  "private": true,
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "dev": "next dev frontend",
+    "build": "next build frontend",
+    "start": "next start frontend",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.3.0",
     "@prisma/client": "^5.7.1",
-    "express": "^4.18.2",
+    "antd": "^5.12.5",
     "axios": "^1.6.2",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "crypto": "^1.0.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "express-rate-limit": "^7.1.5"
+    "next": "^14.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
     "prisma": "^5.7.1"
   },
-  "keywords": ["qwen", "openai", "api", "endpoint", "docker"],
+  "keywords": ["qwen", "openai", "api", "endpoint", "docker", "nextjs", "antd"],
   "license": "Apache-2.0"
 }

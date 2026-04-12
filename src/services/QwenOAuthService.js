@@ -3,13 +3,13 @@ const crypto = require('crypto');
 const AccountManager = require('../db/models/AccountManager');
 
 class QwenOAuthService {
-  // Qwen OAuth 端点配置
+  // Qwen OAuth 固定端点配置（基于官方 Qwen Code 实现）
   static get OAUTH_CONFIG() {
     return {
-      baseUrl: process.env.QWEN_OAUTH_BASE_URL,
-      apiUrl: process.env.QWEN_API_URL,
-      clientId: process.env.QWEN_OAUTH_CLIENT_ID,
-      scope: process.env.QWEN_OAUTH_SCOPE
+      baseUrl: 'https://chat.qwen.ai',
+      apiUrl: 'https://portal.qwen.ai',
+      clientId: 'f0304373b74a44d2b584a3fb70ca9e56',
+      scope: 'openid profile email model.completion'
     };
   }
 
@@ -30,10 +30,6 @@ class QwenOAuthService {
    */
   static async requestDeviceCode(pkceChallenge) {
     const { baseUrl, clientId, scope } = this.OAUTH_CONFIG;
-    
-    if (!baseUrl || !clientId) {
-      throw new Error('QWEN_OAUTH_BASE_URL 或 QWEN_OAUTH_CLIENT_ID 环境变量未配置');
-    }
     
     const response = await axios.post(
       `${baseUrl}/api/v1/oauth2/device/code`,
@@ -152,10 +148,6 @@ class QwenOAuthService {
    */
   static async refreshToken(refreshToken) {
     const { baseUrl, clientId } = this.OAUTH_CONFIG;
-    
-    if (!baseUrl || !clientId) {
-      throw new Error('QWEN_OAUTH_BASE_URL 或 QWEN_OAUTH_CLIENT_ID 环境变量未配置');
-    }
     
     try {
       const response = await axios.post(

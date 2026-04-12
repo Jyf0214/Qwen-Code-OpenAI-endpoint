@@ -3,10 +3,10 @@ const AccountManager = require('../db/models/AccountManager');
 const { prisma } = require('../db/prismaClient');
 
 class QwenProxyService {
-  // Qwen API 端点
+  // Qwen API 固定端点配置（基于官方 Qwen Code 实现）
   static get API_CONFIG() {
     return {
-      baseUrl: process.env.QWEN_API_URL,
+      baseUrl: 'https://portal.qwen.ai',
       defaultModel: process.env.DEFAULT_MODEL,
       timeout: parseInt(process.env.REQUEST_TIMEOUT),
       maxRetries: parseInt(process.env.MAX_RETRIES)
