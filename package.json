@@ -4,38 +4,30 @@
   "description": "OpenAI-compatible endpoint for Qwen Code with multi-account support",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"cd frontend && npm run dev\"",
-    "dev:backend": "nodemon src/index.js",
-    "build": "cd frontend && npm run build",
-    "build:vercel": "cd frontend && npm run build",
-    "start": "node src/index.js",
-    "start:vercel": "cd frontend && npm run start",
+    "dev": "next dev --turbopack",
+    "build": "prisma db push && next build",
+    "build:vercel": "prisma db push && next build",
+    "start": "next start",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.0.0",
     "@ant-design/nextjs-registry": "^1.1.0",
     "@prisma/client": "^6.5.0",
     "antd": "^6.3.5",
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "express": "^4.21.2",
-    "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.3",
-    "morgan": "^1.10.0",
     "next": "^16.2.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2",
-    "nodemon": "^3.1.9",
     "prisma": "^6.5.0"
   },
-  "keywords": ["qwen", "openai", "api", "endpoint", "docker", "nextjs", "antd", "vercel"],
+  "keywords": ["qwen", "openai", "api", "endpoint", "nextjs", "antd", "vercel", "docker"],
   "license": "Apache-2.0"
 }

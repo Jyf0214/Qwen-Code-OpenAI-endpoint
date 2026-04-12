@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # MySQL 数据库
   mysql:
     image: mysql:8.0
     container_name: qwen-openai-mysql
@@ -23,26 +22,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # phpMyAdmin（可选，用于管理 MySQL）
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: qwen-openai-phpmyadmin
-    restart: unless-stopped
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "${PHPMYADMIN_PORT}:80"
-    depends_on:
-      - mysql
-    networks:
-      - qwen-network
-    profiles:
-      - tools
-
-  # Qwen OpenAI 端点服务
   app:
     build:
       context: .
@@ -50,14 +29,11 @@ services:
     container_name: qwen-openai-app
     restart: unless-stopped
     environment:
-      PORT: ${APP_PORT}
       NODE_ENV: production
       DATABASE_URL: mysql://${DB_USER}:${DB_PASSWORD}@mysql:3306/${DB_NAME}
-      MAX_RETRIES: ${MAX_RETRIES}
-      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
-      WEB_UI_ENABLED: ${WEB_UI_ENABLED}
-      API_SECRET: ${API_SECRET}
       JWT_SECRET: ${JWT_SECRET}
+      API_SECRET: ${API_SECRET}
+      WEB_UI_ENABLED: ${WEB_UI_ENABLED:-true}
     ports:
       - "${APP_PORT}:3000"
     depends_on:
@@ -67,8 +43,6 @@ services:
       - qwen-network
     volumes:
       - ./logs:/app/logs
-    command: >
-      sh -c "npx prisma db push --accept-data-loss && node src/index.js"
 
 volumes:
   mysql_data:

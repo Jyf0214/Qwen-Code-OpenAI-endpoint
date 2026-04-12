@@ -1,9 +1,18 @@
 {
   "version": 2,
+  "buildCommand": "prisma db push && next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/v1/:path*",
       "destination": "/api/v1/:path*"
     }
-  ]
+  ],
+  "functions": {
+    "app/api/v1/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
 }
