@@ -2,25 +2,28 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Form, Input, Button, Card, message, Result } from 'antd'
+import { Form, Input, Button, Card, message } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
-  const [disabled, setDisabled] = useState(false)
+  const [checking, setChecking] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    // 检查 Web UI 是否被禁用
-    fetch('/api/system/health')
+    // 检查是否已有用户
+    fetch('/api/auth/check-users')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data.webUIEnabled === false) {
-          setDisabled(true)
+        if (data.success && !data.hasUsers) {
+          // 无用户，跳转注册页
+          router.replace('/register')
+        } else {
+          setChecking(false)
         }
       })
-      .catch(() => {})
-  }, [])
+      .catch(() => setChecking(false))
+  }, [router])
 
   const onFinish = async (values) => {
     setLoading(true)
@@ -37,7 +40,7 @@ export default function LoginPage() {
         message.success('登录成功')
         router.push('/dashboard')
       } else {
-        message.error(data.message || '登录失败')
+        message.error(data.message || '用户名或密码错误')
       }
     } catch (error) {
       message.error('网络错误，请重试')
@@ -46,43 +49,31 @@ export default function LoginPage() {
     }
   }
 
-  if (disabled) {
+  if (checking) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: '2rem'
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
       }}>
-        <Card style={{ width: 500, maxWidth: '100%' }}>
-          <Result
-            status="warning"
-            title="Web 管理面板已禁用"
-            subTitle="管理员已通过环境变量 WEB_UI_ENABLED=false 禁用了 Web 管理面板。"
-            extra={
-              <p style={{ color: '#999', fontSize: 12 }}>
-                OpenAI 兼容 API 端点仍然可用：/v1/chat/completions
-              </p>
-            }
-          />
-        </Card>
+        <Card style={{ textAlign: 'center' }}>加载中...</Card>
       </div>
     )
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
       justifyContent: 'center',
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       padding: '2rem'
     }}>
-      <Card 
-        title="🤖 Qwen OpenAI 端点" 
+      <Card
+        title="🤖 Qwen OpenAI 端点"
         style={{ width: 400, maxWidth: '100%' }}
       >
         <Form
@@ -95,9 +86,9 @@ export default function LoginPage() {
             name="username"
             rules={[{ required: true, message: '请输入用户名' }]}
           >
-            <Input 
-              prefix={<UserOutlined />} 
-              placeholder="用户名" 
+            <Input
+              prefix={<UserOutlined />}
+              placeholder="用户名"
             />
           </Form.Item>
 
@@ -112,9 +103,9 @@ export default function LoginPage() {
           </Form.Item>
 
           <Form.Item>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
+            <Button
+              type="primary"
+              htmlType="submit"
               loading={loading}
               block
             >
@@ -122,9 +113,6 @@ export default function LoginPage() {
             </Button>
           </Form.Item>
         </Form>
-        <div style={{ textAlign: 'center', color: '#999', fontSize: 12 }}>
-          首次登录使用默认账号 admin / API_SECRET
-        </div>
       </Card>
     </div>
   )

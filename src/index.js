@@ -62,25 +62,25 @@ app.all('*', async (req, res) => {
 // ==================== 启动服务 ====================
 
 async function initializeDatabase() {
-  const bcrypt = require('bcryptjs')
-  const defaultPassword = process.env.API_SECRET
-  
-  // 创建默认管理员用户
-  const hashedPassword = await bcrypt.hash(defaultPassword, 10)
-  
-  await prisma.user.upsert({
-    where: { username: 'admin' },
-    update: {},
-    create: {
-      username: 'admin',
-      password: hashedPassword
-    }
-  })
+  const { execSync } = require('child_process')
+
+  // 执行 prisma db push 自动建表
+  console.log('🔄 同步数据库结构...')
+  try {
+    execSync('npx prisma db push --accept-data-loss', {
+      stdio: 'inherit',
+      cwd: process.cwd()
+    })
+    console.log('✅ 数据库结构同步完成')
+  } catch (error) {
+    console.error('❌ 数据库结构同步失败:', error.message)
+    throw error
+  }
 
   // 初始化默认设置
   const defaultSettings = [
     { keyName: 'polling_strategy', keyValue: 'round-robin', description: '账号轮询策略' },
-    { keyName: 'default_model', keyValue: process.env.DEFAULT_MODEL || 'coder-model', description: '默认模型' },
+    { keyName: 'default_model', keyValue: 'coder-model', description: '默认模型' },
     { keyName: 'auto_refresh_token', keyValue: 'true', description: '自动刷新 Token' }
   ]
 

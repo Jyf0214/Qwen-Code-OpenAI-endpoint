@@ -5,12 +5,12 @@ export function proxy(request) {
   const token = request.cookies.get('token')?.value
   const { pathname } = request.nextUrl
 
-  // 登录页不需要验证
-  if (pathname === '/login') {
+  // 登录页和注册页不需要验证
+  if (pathname === '/login' || pathname === '/register') {
     return NextResponse.next()
   }
 
-  // API 路由不需要 JWT（使用 API_SECRET）
+  // 认证 API 不需要 JWT
   if (pathname.startsWith('/api/auth')) {
     return NextResponse.next()
   }
@@ -21,11 +21,9 @@ export function proxy(request) {
   }
 
   try {
-    // 验证 token
-    jwt.verify(token, process.env.JWT_SECRET || 'change-this-to-random-secret')
+    jwt.verify(token, process.env.JWT_SECRET)
     return NextResponse.next()
   } catch (error) {
-    // token 无效，重定向到登录页
     return NextResponse.redirect(new URL('/login', request.url))
   }
 }

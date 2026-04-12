@@ -43,15 +43,14 @@ cd qwen-openai-endpoint
 
 # 2. 配置环境变量
 cp .env.docker .env
-# 编辑 .env 文件，填写 DATABASE_URL、API_SECRET、JWT_SECRET
+# 编辑 .env 文件，填写 DATABASE_URL、JWT_SECRET
 
 # 3. 启动服务
 docker-compose up -d
 
-# 4. 访问管理面板
-# 浏览器打开: http://localhost:3000/login
-# 默认账号: admin
-# 默认密码: API_SECRET 环境变量的值
+# 4. 首次访问管理面板
+# 浏览器打开: http://localhost:3000
+# 首次访问将引导您创建管理员账户
 ```
 
 ### 方式二：本地运行
@@ -62,15 +61,12 @@ npm install
 
 # 2. 配置环境变量
 cp .env.example .env
-# 编辑 .env 文件，填写 DATABASE_URL、API_SECRET、JWT_SECRET
+# 编辑 .env 文件，填写 DATABASE_URL、JWT_SECRET
 
 # 3. 生成 Prisma 客户端
 npx prisma generate
 
-# 4. 初始化数据库
-npx prisma db push
-
-# 5. 启动服务
+# 4. 启动服务（自动同步数据库结构）
 npm start
 
 # 或使用开发模式
@@ -84,7 +80,7 @@ npm run dev
 | 变量名 | 说明 | 示例值 |
 |--------|------|--------|
 | `DATABASE_URL` | Prisma 数据库连接 URL | `mysql://user:password@localhost:3306/dbname` |
-| `API_SECRET` | API 密钥（用于 OpenAI 端点和默认管理员密码） | `your-random-secret` |
+| `API_SECRET` | API 调用密钥（用于 OpenAI 端点鉴权） | `your-random-secret` |
 | `JWT_SECRET` | JWT 密钥（用于管理面板认证） | `your-jwt-secret` |
 
 以下参数均有默认值，无需配置：
