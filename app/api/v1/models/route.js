@@ -1,7 +1,7 @@
 export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
-import * as Account from '../../../../lib/account'
+import * as Account from '../../../lib/account'
 
 export async function GET() {
   try {

@@ -3,7 +3,7 @@ export const maxDuration = 60
 
 import { NextResponse } from 'next/server'
 import axios from 'axios'
-import * as Account from '../../../../../lib/account'
+import * as Account from '../../../../lib/account'
 
 const API_CONFIG = {
   baseUrl: 'https://portal.qwen.ai',
