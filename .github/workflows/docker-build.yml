@@ -79,7 +79,8 @@ jobs:
 
       - name: 拉取并测试镜像
         run: |
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          IMAGE_NAME_LOWER=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE="${{ env.REGISTRY }}/${IMAGE_NAME_LOWER}:${{ github.sha }}"
           echo "测试镜像: $IMAGE"
           docker pull $IMAGE
           docker run --rm $IMAGE node --version
