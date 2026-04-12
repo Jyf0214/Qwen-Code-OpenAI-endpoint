@@ -184,7 +184,7 @@ class AccountManager {
   // 获取统计信息
   static async getStats() {
     const now = new Date();
-    
+
     const [total, active, expired, totalRequests] = await Promise.all([
       prisma.account.count(),
       prisma.account.count({
@@ -217,6 +217,31 @@ class AccountManager {
       expired,
       totalRequests: totalRequests._sum.requestCount || 0
     };
+  }
+
+  // 更新 token 使用统计
+  static async addTokenUsage(id, inputTokens, outputTokens, totalTokens) {
+    await prisma.account.update({
+      where: { id: parseInt(id) },
+      data: {
+        tokenUsedInput: { increment: inputTokens },
+        tokenUsedOutput: { increment: outputTokens },
+        tokenUsedTotal: { increment: totalTokens },
+        tokenLifetimeTotal: { increment: BigInt(totalTokens) }
+      }
+    });
+  }
+
+  // 重置 token 使用统计（保留 lifetime total）
+  static async resetTokenUsage(id) {
+    await prisma.account.update({
+      where: { id: parseInt(id) },
+      data: {
+        tokenUsedInput: 0,
+        tokenUsedOutput: 0,
+        tokenUsedTotal: 0
+      }
+    });
   }
 }
 

@@ -40,6 +40,12 @@ model Account {
   isActive                  Boolean   @map("is_active") @default(true)
   requestCount              Int       @map("request_count") @default(0)
   lastUsedAt                DateTime? @map("last_used_at")
+  // Token 使用统计
+  tokenUsedInput            Int       @default(0) @map("token_used_input")
+  tokenUsedOutput           Int       @default(0) @map("token_used_output")
+  tokenUsedTotal            Int       @default(0) @map("token_used_total")
+  // Token 总调用数（不可重置）
+  tokenLifetimeTotal        BigInt    @default(0) @map("token_lifetime_total")
   createdAt                 DateTime  @default(now()) @map("created_at")
   updatedAt                 DateTime  @updatedAt @map("updated_at")
   requestLogs               RequestLog[]

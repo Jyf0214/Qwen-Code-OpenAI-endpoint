@@ -168,6 +168,31 @@ export default function DashboardPage() {
     })
   }
 
+  const handleResetTokenUsage = async (id) => {
+    Modal.confirm({
+      title: '清除 Token 使用数据',
+      content: '将清除当前 token 使用统计（输入/输出/总计），但保留总调用数。确定继续？',
+      onOk: async () => {
+        try {
+          const res = await fetch(`/api/accounts/${id}/reset-tokens`, {
+            method: 'POST'
+          })
+
+          const data = await res.json()
+
+          if (data.success) {
+            message.success(data.message)
+            loadData()
+          } else {
+            message.error(data.message || '清除失败')
+          }
+        } catch (error) {
+          message.error('清除失败')
+        }
+      }
+    })
+  }
+
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
     message.success('已退出登录')
@@ -194,9 +219,22 @@ export default function DashboardPage() {
       }
     },
     {
+      title: 'Token 使用',
+      key: 'tokenUsage',
+      width: 200,
+      render: (_, record) => (
+        <div style={{ fontSize: 12 }}>
+          <div>输入: {record.tokenUsedInput?.toLocaleString() || 0}</div>
+          <div>输出: {record.tokenUsedOutput?.toLocaleString() || 0}</div>
+          <div>总计: {record.tokenUsedTotal?.toLocaleString() || 0}</div>
+          <div style={{ color: '#999' }}>Lifetime: {record.tokenLifetimeTotal?.toLocaleString() || 0}</div>
+        </div>
+      )
+    },
+    {
       title: '请求数',
       dataIndex: 'requestCount',
-      width: 100,
+      width: 80,
     },
     {
       title: '过期时间',
@@ -206,9 +244,9 @@ export default function DashboardPage() {
     {
       title: '操作',
       key: 'action',
-      width: 300,
+      width: 320,
       render: (_, record) => (
-        <Space>
+        <Space wrap>
           {record.status === 'pending' && (
             <Button size="small" onClick={() => handleCheckToken(record.id)}>
               检查 Token
@@ -219,8 +257,13 @@ export default function DashboardPage() {
               刷新 Token
             </Button>
           )}
-          <Button 
-            size="small" 
+          {(record.tokenUsedInput > 0 || record.tokenUsedOutput > 0) && (
+            <Button size="small" onClick={() => handleResetTokenUsage(record.id)}>
+              清除 Token
+            </Button>
+          )}
+          <Button
+            size="small"
             icon={record.isActive ? <PoweroffOutlined /> : <CheckCircleOutlined />}
             onClick={() => handleToggleAccount(record.id)}
           >

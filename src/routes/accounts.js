@@ -204,7 +204,7 @@ router.patch('/accounts/:id/toggle', async (req, res) => {
   try {
     const { id } = req.params;
     const newStatus = await AccountManager.toggleAccountActive(id);
-    
+
     res.json({
       success: true,
       data: {
@@ -214,6 +214,25 @@ router.patch('/accounts/:id/toggle', async (req, res) => {
     });
   } catch (error) {
     console.error('切换账号状态失败:', error.message);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// 重置账号 token 使用统计
+router.post('/accounts/:id/reset-tokens', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await AccountManager.resetTokenUsage(id);
+
+    res.json({
+      success: true,
+      message: 'Token 使用数据已清除，总调用数已保留'
+    });
+  } catch (error) {
+    console.error('重置 token 使用统计失败:', error.message);
     res.status(500).json({
       success: false,
       message: error.message

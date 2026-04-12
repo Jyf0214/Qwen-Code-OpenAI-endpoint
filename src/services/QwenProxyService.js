@@ -103,6 +103,16 @@ class QwenProxyService {
         // 更新账号使用统计
         await AccountManager.incrementRequestCount(account.id);
 
+        // 捕获并保存 token 使用量
+        const usage = response.data?.usage || response.data?.usage_metadata;
+        if (usage) {
+          const inputTokens = usage.prompt_tokens || usage.input_token_count || usage.promptTokenCount || 0;
+          const outputTokens = usage.completion_tokens || usage.output_token_count || usage.candidatesTokenCount || 0;
+          const totalTokens = usage.total_tokens || usage.total_token_count || usage.totalTokenCount || (inputTokens + outputTokens);
+
+          await AccountManager.addTokenUsage(account.id, inputTokens, outputTokens, totalTokens);
+        }
+
         return response.data;
       } catch (error) {
         lastError = error;
