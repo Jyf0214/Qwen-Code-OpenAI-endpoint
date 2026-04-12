@@ -1,4 +1,4 @@
-const { prisma } = require('./prismaClient');
+const { prisma } = require('../prismaClient');
 
 class AccountManager {
   // 获取所有账号
