@@ -6,9 +6,15 @@ RUN apk add --no-cache python3 make g++ openssl
 # 设置工作目录
 WORKDIR /app
 
-# 复制后端依赖
+# 复制依赖文件
 COPY package*.json ./
+COPY frontend/package.json ./frontend/
+
+# 安装依赖
 RUN npm ci && npm cache clean --force
+
+# 创建前端 node_modules 软链接
+RUN ln -sf ../node_modules /app/frontend/node_modules
 
 # 复制 Prisma schema 并生成客户端
 COPY prisma ./prisma/

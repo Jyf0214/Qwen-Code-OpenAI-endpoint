@@ -7,3 +7,7 @@ build/
 coverage/
 .qwen/
 oauth_creds_*.json
+frontend/.next/
+frontend/dist/
+frontend/node_modules
+prisma/migrations/
