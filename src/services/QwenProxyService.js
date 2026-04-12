@@ -105,15 +105,35 @@ class QwenProxyService {
 
         // 捕获并保存 token 使用量
         const usage = response.data?.usage || response.data?.usage_metadata;
+        let tokenUsage = null;
+
         if (usage) {
           const inputTokens = usage.prompt_tokens || usage.input_token_count || usage.promptTokenCount || 0;
           const outputTokens = usage.completion_tokens || usage.output_token_count || usage.candidatesTokenCount || 0;
           const totalTokens = usage.total_tokens || usage.total_token_count || usage.totalTokenCount || (inputTokens + outputTokens);
 
           await AccountManager.addTokenUsage(account.id, inputTokens, outputTokens, totalTokens);
+
+          // 确保响应中包含标准 OpenAI usage 格式
+          tokenUsage = {
+            prompt_tokens: inputTokens,
+            completion_tokens: outputTokens,
+            total_tokens: totalTokens
+          };
         }
 
-        return response.data;
+        // 构建最终响应（确保包含 usage）
+        const result = {
+          ...response.data,
+          usage: tokenUsage || response.data?.usage || {
+            prompt_tokens: 0,
+            completion_tokens: 0,
+            total_tokens: 0,
+            note: '上游 API 未返回 token 使用量'
+          }
+        };
+
+        return result;
       } catch (error) {
         lastError = error;
 
@@ -209,15 +229,46 @@ class QwenProxyService {
         responseType: 'stream'
       });
 
+      let lastDataChunk = null;
+      let streamEnded = false;
+
       // 将远程响应流式传输到客户端
       response.data.on('data', (chunk) => {
         res.write(chunk);
+
+        // 捕获最后一条数据块用于提取 usage
+        const text = chunk.toString();
+        const lines = text.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+            try {
+              const parsed = JSON.parse(line.slice(6));
+              if (parsed.usage || parsed.usage_metadata) {
+                lastDataChunk = parsed;
+              }
+            } catch {}
+          }
+        }
       });
 
       response.data.on('end', () => {
         res.end();
+        streamEnded = true;
+
         // 更新使用统计
         AccountManager.incrementRequestCount(account.id).catch(console.error);
+
+        // 保存 token 使用量
+        if (lastDataChunk) {
+          const usage = lastDataChunk.usage || lastDataChunk.usage_metadata;
+          if (usage) {
+            const inputTokens = usage.prompt_tokens || usage.input_token_count || usage.promptTokenCount || 0;
+            const outputTokens = usage.completion_tokens || usage.output_token_count || usage.candidatesTokenCount || 0;
+            const totalTokens = usage.total_tokens || usage.total_token_count || usage.totalTokenCount || (inputTokens + outputTokens);
+
+            AccountManager.addTokenUsage(account.id, inputTokens, outputTokens, totalTokens).catch(console.error);
+          }
+        }
       });
 
       response.data.on('error', (error) => {
