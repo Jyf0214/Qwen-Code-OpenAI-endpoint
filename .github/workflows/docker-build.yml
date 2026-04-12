@@ -19,8 +19,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-      attestations: write
-      id-token: write
 
     steps:
       - name: 检出代码
@@ -61,21 +59,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: 生成 SBOM
-        if: github.event_name != 'pull_request'
-        continue-on-error: true
-        uses: anchore/sbom-action@v0
-        with:
-          path: .
-          output-file: sbom.spdx.json
-
-      - name: 上传 SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom
-          path: sbom.spdx.json
-          retention-days: 30
 
   test-image:
     name: 测试构建的镜像
