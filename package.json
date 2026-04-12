@@ -4,11 +4,12 @@
   "description": "OpenAI-compatible endpoint for Qwen Code with multi-account support",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev": "concurrently \"npm run dev:backend\" \"cd frontend && npm run dev\"",
     "dev:backend": "nodemon src/index.js",
-    "dev:frontend": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
+    "build:vercel": "cd frontend && npm run build",
     "start": "node src/index.js",
+    "start:vercel": "cd frontend && npm run start",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
@@ -35,6 +36,6 @@
     "nodemon": "^3.1.9",
     "prisma": "^6.5.0"
   },
-  "keywords": ["qwen", "openai", "api", "endpoint", "docker", "nextjs", "antd"],
+  "keywords": ["qwen", "openai", "api", "endpoint", "docker", "nextjs", "antd", "vercel"],
   "license": "Apache-2.0"
 }
