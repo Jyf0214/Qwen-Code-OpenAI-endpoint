@@ -100,6 +100,40 @@ npm run dev
 > - 模型名称已硬编码为 `coder-model`（与官方 Qwen Code 一致），用户传入的 model 参数会被强制重写，无需配置。
 > - 配置完成后，可将 `WEB_UI_ENABLED` 设为 `false` 以禁用 Web 管理面板，防止未授权访问。此时仅 OpenAI API 端点（`/v1/`）可用。
 
+### 生成密钥
+
+`API_SECRET` 和 `JWT_SECRET` 必须是随机生成的强密钥，请勿使用简单密码。
+
+**使用 Node.js 生成：**
+
+```bash
+# 生成 API_SECRET（64 字节随机字符串）
+node -e "console.log(require('crypto').randomBytes(64).toString('base64url'))"
+
+# 生成 JWT_SECRET（32 字节随机字符串）
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+```
+
+**使用 OpenSSL 生成：**
+
+```bash
+# 生成 API_SECRET
+openssl rand -base64 48
+
+# 生成 JWT_SECRET
+openssl rand -base64 32
+```
+
+**使用 Python 生成：**
+
+```python
+import secrets
+print("API_SECRET:", secrets.token_urlsafe(64))
+print("JWT_SECRET:", secrets.token_urlsafe(32))
+```
+
+生成后填入 `.env` 文件即可。
+
 ## API 文档
 
 ### OpenAI 兼容端点
