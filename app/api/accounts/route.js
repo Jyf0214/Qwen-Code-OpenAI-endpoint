@@ -2,8 +2,8 @@ export const runtime = 'nodejs'
 export const maxDuration = 60
 
 import { NextResponse } from 'next/server'
-import * as Account from '../../../lib/account.js'
-import * as OAuth from '../../../lib/oauth.js'
+import * as Account from '@/lib/account'
+import * as OAuth from '@/lib/oauth'
 
 // GET /api/accounts
 export async function GET() {

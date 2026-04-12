@@ -13,7 +13,7 @@ COPY . .
 # 3. 生成 Prisma 客户端
 RUN npx prisma generate
 
-# 4. 构建
+# 4. 构建（不执行 prisma db push）
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN npm run build
 
@@ -35,4 +35,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/system/health || exit 1
 
 ENV NODE_OPTIONS="--max-old-space-size=512"
-CMD ["npx", "next", "start"]
+CMD ["sh", "-c", "npx prisma db push && npx next start"]

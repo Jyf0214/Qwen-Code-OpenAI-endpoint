@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma db push && next build",
+    "build": "next build",
     "build:vercel": "prisma db push && next build",
     "start": "next start",
     "db:generate": "prisma generate",
