@@ -8,8 +8,21 @@ import { PlusOutlined, ReloadOutlined, DeleteOutlined, PoweroffOutlined, CheckCi
 const { Header, Content } = Layout
 const statusMap = { pending: { color: 'gold', text: '待授权' }, active: { color: 'green', text: '活跃' }, expired: { color: 'red', text: '已过期' }, error: { color: 'red', text: '错误' } }
 
-const safeJson = async (res) => { try { return await res.json() } catch { return { success: false, message: '服务器响应格式错误' } } }
-const safeFetch = async (url, options) => { try { return await fetch(url, options) } catch { return { ok: false, json: async () => ({ success: false, message: '网络连接失败，请检查网络' }) } } }
+const safeJson = async (res) => {
+  if (!res || !res.json) return { success: false, message: '无响应' }
+  try { return await res.json() }
+  catch { return { success: false, message: '服务器响应格式错误' } }
+}
+
+const apiCall = async (url, options) => {
+  try {
+    const res = await fetch(url, options)
+    const data = await safeJson(res)
+    return { ok: res.ok, status: res.status, data }
+  } catch (err) {
+    return { ok: false, status: 0, data: { success: false, message: `网络连接失败: ${err.message}` } }
+  }
+}
 
 const columns = [
   { title: '名称', dataIndex: 'name', ellipsis: true },
@@ -57,61 +70,54 @@ export default function DashboardPage() {
   const loadData = async () => {
     setLoading(true)
     try {
-      const [aRes, sRes] = await Promise.all([safeFetch('/api/accounts'), safeFetch('/api/accounts/stats')])
-      const a = await safeJson(aRes)
-      const s = await safeJson(sRes)
-      if (a.success) setAccounts(a.data || [])
-      else message.error(`加载账号列表失败: ${a.message}`)
-      if (s.success) setStats(s.data || { total: 0, active: 0, expired: 0, totalRequests: 0 })
-      else message.error(`加载统计失败: ${s.message}`)
+      const [a, s] = await Promise.all([apiCall('/api/accounts'), apiCall('/api/accounts/stats')])
+      if (a.data?.success) setAccounts(a.data.data || [])
+      else message.error(`加载账号列表失败: ${a.data?.message || '未知错误'}`)
+      if (s.data?.success) setStats(s.data.data || { total: 0, active: 0, expired: 0, totalRequests: 0 })
+      else message.error(`加载统计失败: ${s.data?.message || '未知错误'}`)
     } catch (err) { message.error(`加载失败: ${err.message}`) }
     finally { setLoading(false) }
   }
 
   const handleAdd = async (values) => {
     try {
-      const res = await safeFetch('/api/accounts/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: values.name }) })
-      const data = await safeJson(res)
-      if (res.ok && data.success) { message.success('授权流程已启动，请在浏览器中完成授权'); setAddModalVisible(false); loadData() }
-      else message.error(`添加失败: ${data.message || '未知错误'}`)
+      const res = await apiCall('/api/accounts/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: values.name }) })
+      if (res.ok && res.data?.success) { message.success('授权流程已启动，请在浏览器中完成授权'); setAddModalVisible(false); loadData() }
+      else message.error(`添加失败: ${res.data?.message || '未知错误'}`)
     } catch (err) { message.error(`添加失败: ${err.message}`) }
   }
 
   const handleCheckToken = async (id) => {
     try {
-      const res = await safeFetch(`/api/accounts/${id}/check-token`, { method: 'POST' })
-      const data = await safeJson(res)
-      if (res.ok && data.success) { message.success('Token 获取成功'); loadData() }
-      else message.error(`检查失败: ${data.message || '未知错误'}`)
+      const res = await apiCall(`/api/accounts/${id}/check-token`, { method: 'POST' })
+      if (res.ok && res.data?.success) { message.success('Token 获取成功'); loadData() }
+      else message.error(`检查失败: ${res.data?.message || '未知错误'}`)
     } catch (err) { message.error(`检查失败: ${err.message}`) }
   }
 
   const handleRefreshToken = async (id) => {
     try {
-      const res = await safeFetch(`/api/accounts/${id}/refresh`, { method: 'POST' })
-      const data = await safeJson(res)
-      if (res.ok && data.success) { message.success('Token 刷新成功'); loadData() }
-      else if (data.needReauth) message.error('Refresh Token 已失效，请删除后重新添加账号')
-      else message.error(`刷新失败: ${data.message || '未知错误'}`)
+      const res = await apiCall(`/api/accounts/${id}/refresh`, { method: 'POST' })
+      if (res.ok && res.data?.success) { message.success('Token 刷新成功'); loadData() }
+      else if (res.data?.needReauth) message.error('Refresh Token 已失效，请删除后重新添加账号')
+      else message.error(`刷新失败: ${res.data?.message || '未知错误'}`)
     } catch (err) { message.error(`刷新失败: ${err.message}`) }
   }
 
   const handleToggle = async (id) => {
     try {
-      const res = await safeFetch(`/api/accounts/${id}/toggle`, { method: 'PATCH' })
-      const data = await safeJson(res)
-      if (res.ok && data.success) { message.success(data.data.message); loadData() }
-      else message.error(`操作失败: ${data.message || '未知错误'}`)
+      const res = await apiCall(`/api/accounts/${id}/toggle`, { method: 'PATCH' })
+      if (res.ok && res.data?.success) { message.success(res.data.data?.message); loadData() }
+      else message.error(`操作失败: ${res.data?.message || '未知错误'}`)
     } catch (err) { message.error(`操作失败: ${err.message}`) }
   }
 
   const handleDelete = async (id) => {
-    Modal.confirm({ title: '确认删除', content: '删除后不可恢复，确定要删除此账号吗？', okText: '删除', okType: 'danger', cancelText: '取消', onOk: async () => {
+    Modal.confirm({ title: '确认删除', content: '删除后不可恢复', okText: '删除', okType: 'danger', cancelText: '取消', onOk: async () => {
       try {
-        const res = await safeFetch(`/api/accounts/${id}`, { method: 'DELETE' })
-        const data = await safeJson(res)
-        if (res.ok && data.success) { message.success('删除成功'); loadData() }
-        else message.error(`删除失败: ${data.message || '未知错误'}`)
+        const res = await apiCall(`/api/accounts/${id}`, { method: 'DELETE' })
+        if (res.ok && res.data?.success) { message.success('删除成功'); loadData() }
+        else message.error(`删除失败: ${res.data?.message || '未知错误'}`)
       } catch (err) { message.error(`删除失败: ${err.message}`) }
     }})
   }
@@ -119,10 +125,9 @@ export default function DashboardPage() {
   const handleResetTokens = async (id) => {
     Modal.confirm({ title: '清除 Token 使用数据', content: '将清除当前使用统计（输入/输出/总计），但保留总调用数。确定继续？', onOk: async () => {
       try {
-        const res = await safeFetch(`/api/accounts/${id}`, { method: 'POST' })
-        const data = await safeJson(res)
-        if (res.ok && data.success) { message.success(data.message); loadData() }
-        else message.error(`清除失败: ${data.message || '未知错误'}`)
+        const res = await apiCall(`/api/accounts/${id}`, { method: 'POST' })
+        if (res.ok && res.data?.success) { message.success(res.data.message); loadData() }
+        else message.error(`清除失败: ${res.data?.message || '未知错误'}`)
       } catch (err) { message.error(`清除失败: ${err.message}`) }
     }})
   }
