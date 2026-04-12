@@ -14,6 +14,24 @@
 - ✅ **流式响应**：支持 SSE 流式输出
 - ✅ **请求日志**：完整的请求记录和统计信息
 
+## 架构说明
+
+### 认证流程（基于官方 Qwen Code 实现）
+
+```
+用户添加账号 → 生成 PKCE 验证码对 → 请求设备授权码 → 
+用户在浏览器中授权 → 轮询获取 Access Token → 
+存储到 MySQL → 定时自动刷新 Token
+```
+
+### 请求流程
+
+```
+客户端请求 → 选择可用账号（轮询/最少使用） → 
+注入 Access Token → 强制重写模型为 coder-model → 
+转发到 Qwen API → 返回响应 → 更新使用统计
+```
+
 ## 快速开始
 
 ### 方式一：Docker Compose（推荐）
@@ -23,15 +41,15 @@
 git clone <repository-url>
 cd qwen-openai-endpoint
 
-# 2. 配置环境变量（必填）
+# 2. 配置环境变量
 cp .env.docker .env
-# 编辑 .env 文件，填写所有必要的环境变量
+# 编辑 .env 文件，填写 DATABASE_URL、API_SECRET、JWT_SECRET
 
 # 3. 启动服务
 docker-compose up -d
 
 # 4. 访问管理面板
-# 浏览器打开: http://localhost:${APP_PORT}/login
+# 浏览器打开: http://localhost:3000/login
 # 默认账号: admin
 # 默认密码: API_SECRET 环境变量的值
 ```
@@ -42,9 +60,9 @@ docker-compose up -d
 # 1. 安装依赖
 npm install
 
-# 2. 配置环境变量（必填）
+# 2. 配置环境变量
 cp .env.example .env
-# 编辑 .env 文件，填写所有必要的环境变量
+# 编辑 .env 文件，填写 DATABASE_URL、API_SECRET、JWT_SECRET
 
 # 3. 生成 Prisma 客户端
 npx prisma generate
@@ -61,18 +79,23 @@ npm run dev
 
 ## 环境变量配置
 
-**所有环境变量均为必填，不得留空**
+仅需三个必填项，其余参数均使用合理的默认值：
 
 | 变量名 | 说明 | 示例值 |
 |--------|------|--------|
-| `PORT` | 服务端口 | `3000` |
 | `DATABASE_URL` | Prisma 数据库连接 URL | `mysql://user:password@localhost:3306/dbname` |
-| `MAX_RETRIES` | 最大重试次数 | `3` |
-| `REQUEST_TIMEOUT` | 请求超时（毫秒） | `60000` |
 | `API_SECRET` | API 密钥（用于 OpenAI 端点和默认管理员密码） | `your-random-secret` |
 | `JWT_SECRET` | JWT 密钥（用于管理面板认证） | `your-jwt-secret` |
 
-> **注意**：默认模型为 `coder-model`（硬编码，与官方 Qwen Code 一致），无需配置。
+以下参数均有默认值，无需配置：
+
+| 变量名 | 默认值 | 说明 |
+|--------|--------|------|
+| `PORT` | `3000` | 服务端口 |
+| `MAX_RETRIES` | `3` | 最大重试次数 |
+| `REQUEST_TIMEOUT` | `60000` | 请求超时（毫秒） |
+
+> **注意**：模型名称已硬编码为 `coder-model`（与官方 Qwen Code 一致），用户传入的 model 参数会被强制重写，无需配置。
 
 ## API 文档
 
@@ -88,7 +111,7 @@ Content-Type: application/json
 Authorization: Bearer your_api_secret
 
 {
-  "model": "qwen3-coder-plus",
+  "model": "任意值（会被重写为 coder-model）",
   "messages": [
     {"role": "user", "content": "你好"}
   ],
@@ -104,7 +127,7 @@ Content-Type: application/json
 Authorization: Bearer your_api_secret
 
 {
-  "model": "qwen3-coder-plus",
+  "model": "任意值（会被重写为 coder-model）",
   "messages": [
     {"role": "user", "content": "你好"}
   ],
@@ -121,7 +144,7 @@ Authorization: Bearer your_api_secret
 
 ## 管理面板
 
-访问 `http://localhost:${PORT}/login` 打开管理面板：
+访问 `http://localhost:3000/login` 打开管理面板：
 
 - **默认账号**：`admin`
 - **默认密码**：`API_SECRET` 环境变量的值
@@ -189,7 +212,7 @@ npx prisma studio
 ## 技术栈
 
 - **后端**：Node.js + Express
-- **前端**：Next.js 14 + Ant Design 5
+- **前端**：Next.js 16 + Ant Design 6
 - **数据库**：MySQL 8.0 + Prisma ORM
 - **HTTP 客户端**：Axios
 - **认证**：JWT + bcrypt

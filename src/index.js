@@ -26,8 +26,6 @@ const handle = nextApp.getRequestHandler()
 function validateEnv() {
   const requiredEnvVars = [
     'DATABASE_URL',
-    'MAX_RETRIES',
-    'REQUEST_TIMEOUT',
     'API_SECRET',
     'JWT_SECRET'
   ]

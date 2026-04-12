@@ -7,9 +7,9 @@ class QwenProxyService {
   static get API_CONFIG() {
     return {
       baseUrl: 'https://portal.qwen.ai',
-      defaultModel: process.env.DEFAULT_MODEL || 'coder-model',
-      timeout: parseInt(process.env.REQUEST_TIMEOUT) || 60000,
-      maxRetries: parseInt(process.env.MAX_RETRIES) || 3
+      defaultModel: 'coder-model',
+      timeout: 60000,
+      maxRetries: 3
     };
   }
 
@@ -70,10 +70,8 @@ class QwenProxyService {
       'Authorization': `Bearer ${account.accessToken}`
     };
 
-    // 设置默认模型
-    if (!requestBody.model) {
-      requestBody.model = defaultModel;
-    }
+    // 强制重写模型为硬编码默认模型（忽略用户传入的值）
+    requestBody.model = defaultModel;
 
     let lastError = null;
     let response = null;
@@ -179,9 +177,8 @@ class QwenProxyService {
 
     // 确保 stream 为 true
     requestBody.stream = true;
-    if (!requestBody.model) {
-      requestBody.model = defaultModel;
-    }
+    // 强制重写模型为硬编码默认模型（忽略用户传入的值）
+    requestBody.model = defaultModel;
 
     const endpoint = `${baseUrl}/v1/chat/completions`;
     const headers = {
