@@ -12,6 +12,7 @@ const openaiRoutes = require('./routes/openai')
 const accountRoutes = require('./routes/accounts')
 const systemRoutes = require('./routes/system')
 const { verifyOpenAIEndpoint } = require('./middleware/verifyOpenAIEndpoint')
+const { checkWebUIEnabled } = require('./middleware/checkWebUIEnabled')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -49,9 +50,9 @@ app.use(morgan('dev'))
 // OpenAI 兼容端点（使用标准 Authorization: Bearer 验证）
 app.use('/v1', verifyOpenAIEndpoint, openaiRoutes)
 
-// 管理面板 API（使用 JWT 验证）
-app.use('/api/accounts', accountRoutes)
-app.use('/api/system', systemRoutes)
+// 管理面板 API（受 WEB_UI_ENABLED 环境变量控制）
+app.use('/api/accounts', checkWebUIEnabled, accountRoutes)
+app.use('/api/system', checkWebUIEnabled, systemRoutes)
 
 // Next.js 处理
 app.all('*', async (req, res) => {

@@ -94,8 +94,11 @@ npm run dev
 | `PORT` | `3000` | 服务端口 |
 | `MAX_RETRIES` | `3` | 最大重试次数 |
 | `REQUEST_TIMEOUT` | `60000` | 请求超时（毫秒） |
+| `WEB_UI_ENABLED` | `true` | 是否启用 Web 管理面板（设为 `false` 可禁用） |
 
-> **注意**：模型名称已硬编码为 `coder-model`（与官方 Qwen Code 一致），用户传入的 model 参数会被强制重写，无需配置。
+> **注意**：
+> - 模型名称已硬编码为 `coder-model`（与官方 Qwen Code 一致），用户传入的 model 参数会被强制重写，无需配置。
+> - 配置完成后，可将 `WEB_UI_ENABLED` 设为 `false` 以禁用 Web 管理面板，防止未授权访问。此时仅 OpenAI API 端点（`/v1/`）可用。
 
 ## API 文档
 

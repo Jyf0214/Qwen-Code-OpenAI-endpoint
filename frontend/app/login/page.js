@@ -1,13 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Form, Input, Button, Card, message } from 'antd'
+import { Form, Input, Button, Card, message, Result } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
+  const [disabled, setDisabled] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    // 检查 Web UI 是否被禁用
+    fetch('/api/system/health')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data.webUIEnabled === false) {
+          setDisabled(true)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const onFinish = async (values) => {
     setLoading(true)
@@ -31,6 +44,32 @@ export default function LoginPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (disabled) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: '2rem'
+      }}>
+        <Card style={{ width: 500, maxWidth: '100%' }}>
+          <Result
+            status="warning"
+            title="Web 管理面板已禁用"
+            subTitle="管理员已通过环境变量 WEB_UI_ENABLED=false 禁用了 Web 管理面板。"
+            extra={
+              <p style={{ color: '#999', fontSize: 12 }}>
+                OpenAI 兼容 API 端点仍然可用：/v1/chat/completions
+              </p>
+            }
+          />
+        </Card>
+      </div>
+    )
   }
 
   return (

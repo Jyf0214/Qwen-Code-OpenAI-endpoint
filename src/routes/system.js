@@ -99,6 +99,7 @@ router.get('/health', async (req, res) => {
         status: 'healthy',
         database: 'connected',
         accounts: stats,
+        webUIEnabled: process.env.WEB_UI_ENABLED !== 'false',
         uptime: process.uptime(),
         timestamp: new Date().toISOString()
       }
