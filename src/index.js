@@ -19,7 +19,10 @@ const port = process.env.PORT || 3000
 const dev = process.env.NODE_ENV !== 'production'
 
 // 初始化 Next.js
-const nextApp = next({ dev, dir: join(__dirname, '../frontend') })
+const frontendDir = join(__dirname, '../frontend')
+console.log('📂 Next.js frontend dir:', frontendDir)
+console.log('📂 frontend/.next exists:', require('fs').existsSync(join(frontendDir, '.next')))
+const nextApp = next({ dev, dir: frontendDir })
 const handle = nextApp.getRequestHandler()
 
 // ==================== 验证必要环境变量 ====================
@@ -112,10 +115,8 @@ async function start() {
     console.log('🔄 正在初始化数据库...')
     await initializeDatabase()
 
-    // 准备 Next.js
-    console.log('🔄 正在初始化 Next.js...')
-    await nextApp.prepare()
-    console.log('✅ Next.js 初始化完成')
+    // Next.js 已预构建，直接使用请求处理器
+    console.log('✅ Next.js 就绪')
 
     // 启动定时任务：自动刷新 token
     startTokenRefreshScheduler()
