@@ -53,7 +53,6 @@ services:
       PORT: ${APP_PORT}
       NODE_ENV: production
       DATABASE_URL: mysql://${DB_USER}:${DB_PASSWORD}@mysql:3306/${DB_NAME}
-      DEFAULT_MODEL: ${DEFAULT_MODEL}
       MAX_RETRIES: ${MAX_RETRIES}
       REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
       API_SECRET: ${API_SECRET}

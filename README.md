@@ -67,11 +67,12 @@ npm run dev
 |--------|------|--------|
 | `PORT` | 服务端口 | `3000` |
 | `DATABASE_URL` | Prisma 数据库连接 URL | `mysql://user:password@localhost:3306/dbname` |
-| `DEFAULT_MODEL` | 默认模型 | `qwen3-coder-plus` |
 | `MAX_RETRIES` | 最大重试次数 | `3` |
 | `REQUEST_TIMEOUT` | 请求超时（毫秒） | `60000` |
 | `API_SECRET` | API 密钥（用于 OpenAI 端点和默认管理员密码） | `your-random-secret` |
 | `JWT_SECRET` | JWT 密钥（用于管理面板认证） | `your-jwt-secret` |
+
+> **注意**：默认模型为 `coder-model`（硬编码，与官方 Qwen Code 一致），无需配置。
 
 ## API 文档
 

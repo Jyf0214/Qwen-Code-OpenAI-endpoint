@@ -7,9 +7,9 @@ class QwenProxyService {
   static get API_CONFIG() {
     return {
       baseUrl: 'https://portal.qwen.ai',
-      defaultModel: process.env.DEFAULT_MODEL,
-      timeout: parseInt(process.env.REQUEST_TIMEOUT),
-      maxRetries: parseInt(process.env.MAX_RETRIES)
+      defaultModel: process.env.DEFAULT_MODEL || 'coder-model',
+      timeout: parseInt(process.env.REQUEST_TIMEOUT) || 60000,
+      maxRetries: parseInt(process.env.MAX_RETRIES) || 3
     };
   }
 

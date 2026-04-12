@@ -26,7 +26,6 @@ const handle = nextApp.getRequestHandler()
 function validateEnv() {
   const requiredEnvVars = [
     'DATABASE_URL',
-    'DEFAULT_MODEL',
     'MAX_RETRIES',
     'REQUEST_TIMEOUT',
     'API_SECRET',
@@ -34,7 +33,7 @@ function validateEnv() {
   ]
 
   const missing = requiredEnvVars.filter(key => !process.env[key])
-  
+
   if (missing.length > 0) {
     throw new Error(`缺少必要的环境变量: ${missing.join(', ')}`)
   }
@@ -82,7 +81,7 @@ async function initializeDatabase() {
   // 初始化默认设置
   const defaultSettings = [
     { keyName: 'polling_strategy', keyValue: 'round-robin', description: '账号轮询策略' },
-    { keyName: 'default_model', keyValue: process.env.DEFAULT_MODEL, description: '默认模型' },
+    { keyName: 'default_model', keyValue: process.env.DEFAULT_MODEL || 'coder-model', description: '默认模型' },
     { keyName: 'auto_refresh_token', keyValue: 'true', description: '自动刷新 Token' }
   ]
 
