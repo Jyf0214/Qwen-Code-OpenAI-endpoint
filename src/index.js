@@ -95,7 +95,12 @@ async function initializeDatabase() {
   console.log('✅ 数据库初始化完成')
 }
 
+// 禁用控制台缓冲，确保日志立即输出
+process.stdout._handle.setBlocking(true)
+process.stderr._handle.setBlocking(true)
+
 async function start() {
+  console.log('🔄 服务启动中...')
   try {
     console.log('🔄 验证环境变量...')
     validateEnv()
@@ -108,7 +113,9 @@ async function start() {
     await initializeDatabase()
 
     // 准备 Next.js
+    console.log('🔄 正在初始化 Next.js...')
     await nextApp.prepare()
+    console.log('✅ Next.js 初始化完成')
 
     // 启动定时任务：自动刷新 token
     startTokenRefreshScheduler()

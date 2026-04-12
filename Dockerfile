@@ -22,6 +22,7 @@ RUN npx prisma generate
 
 # 复制前端代码并构建
 COPY frontend ./frontend/
+COPY src ./src/
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN cd frontend && npm run build
 
