@@ -16,8 +16,8 @@ RUN ls -la /app && ls -la /app/frontend
 # 仅安装 production 依赖，减少内存占用
 RUN npm ci --omit=dev && npm cache clean --force
 
-# 创建前端 node_modules 软链接
-RUN ln -sf ../node_modules /app/frontend/node_modules
+# 将根 node_modules 复制到 frontend 目录（避免 symlink 导致 Turbopack panic）
+RUN cp -r node_modules frontend/node_modules
 
 # 复制 Prisma schema 并生成客户端
 COPY prisma ./prisma/
@@ -27,6 +27,9 @@ RUN npx prisma generate
 # 复制前端和后端源代码
 COPY frontend ./frontend/
 COPY src ./src/
+
+# 调试：验证 node_modules 是真实目录而非 symlink
+RUN echo "=== 检查 frontend/node_modules 是否为 symlink ===" && test -L /app/frontend/node_modules && (echo "ERROR: frontend/node_modules 是 symlink！" && exit 1) || echo "OK: 不是 symlink"
 
 # 调试：验证源代码已复制
 RUN echo "=== 验证 frontend/app 目录 ===" && ls -la /app/frontend/app && echo "=== 验证 src 目录 ===" && ls -la /app/src
