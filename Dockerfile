@@ -46,7 +46,6 @@ COPY --from=builder --chown=nodejs:nodejs /app/src ./src/
 # 复制 Next.js 构建产物
 COPY --from=builder --chown=nodejs:nodejs /app/frontend/dist ./frontend/dist/
 COPY --from=builder --chown=nodejs:nodejs /app/frontend/next.config.js ./frontend/
-COPY --from=builder --chown=nodejs:nodejs /app/frontend/.next ./frontend/.next/
 COPY --from=builder --chown=nodejs:nodejs /app/frontend/package.json ./frontend/
 
 USER nodejs
