@@ -1,3 +1,15 @@
+> ⚠️ **重要通知：Qwen Code 免费计划已停止支持**
+> 
+> 自 **2026年4月15日** 起，Qwen Code 官方已正式停用免费 OAuth 登录与免费请求额度。
+> 
+> 本项目此前依赖的 Qwen Code 免费登录及接口功能已无法继续使用。若您仍在使用相关功能，请迁移至以下替代方案：
+> - **方案 A**：订阅 [Alibaba Cloud Coding Plan](https://chat.qwen.ai) 付费服务
+> - **方案 B**：配置第三方 API Key（如 OpenRouter、Fireworks AI 等兼容 OpenAI 接口的提供商）
+> 
+> 迁移命令：`qwen /auth` → 选择 `API Key` 或 `Coding Plan`
+> 
+> 详见官方说明：[Qwen Code 文档](https://qwenlm.github.io/qwen-code-docs/en/users/support/tos-privacy/)
+
 # Qwen OpenAI 兼容端点
 
 基于 Qwen Code 官方仓库的 OAuth 登录逻辑和 Token 刷新机制，构建的可 Docker 快速部署的 OpenAI 兼容 API 端点服务。
